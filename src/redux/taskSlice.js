@@ -1,23 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-  tasks: [],
-};
+const initialState = [
+  { id: 1, text: "Example Task", completed: false }
+];
 
 const taskSlice = createSlice({
   name: "tasks",
   initialState,
   reducers: {
     addTask: (state, action) => {
-      state.tasks.push({ id: Date.now(), text: action.payload, completed: false });
+      state.push({ id: Date.now(), text: action.payload, completed: false });
     },
     toggleTask: (state, action) => {
-      const task = state.tasks.find(task => task.id === action.payload);
+      const task = state.find(task => task.id === action.payload);
       if (task) task.completed = !task.completed;
     },
     deleteTask: (state, action) => {
-      state.tasks = state.tasks.filter(task => task.id !== action.payload);
-    },
+      return state.filter(task => task.id !== action.payload);
+    }
   },
 });
 
