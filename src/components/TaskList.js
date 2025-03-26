@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { toggleTask, deleteTask, editTask } from "../redux/taskSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import "./TaskList.css";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+
 
 const TaskList = () => {
   const tasks = useSelector((state) => state.tasks);
@@ -25,34 +27,64 @@ const TaskList = () => {
     setEditingTaskId(null);
   };
 
-  return (
-    <ul>
-      {tasks.map((task) => (
-        <li key={task.id}>
-          <input type="checkbox" checked={task.completed} onChange={() => dispatch(toggleTask(task.id))} />
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
 
-          {editingTaskId === task.id ? (
-            <>
-              <input type="text" value={editedText} onChange={(e) => setEditedText(e.target.value)} />
-              <select value={editedCategory} onChange={(e) => setEditedCategory(e.target.value)}>
-                <option value="Work">Work</option>
-                <option value="Personal">Personal</option>
-                <option value="Urgent">Urgent</option>
-              </select>
-              <input type="date" value={editedDueDate} onChange={(e) => setEditedDueDate(e.target.value)} />
-              <button onClick={() => handleSaveClick(task.id)}>Save</button>
-            </>
-          ) : (
-            <>
-              <span>{task.text} - {task.category} (Due: {task.dueDate || "No due date"})</span>
-              <button onClick={() => handleEditClick(task)}>Edit</button>
-            </>
-          )}
-          
-          <button onClick={() => dispatch(deleteTask(task.id))}>Delete</button>
-        </li>
-      ))}
-    </ul>
+    const newTasks = Array.from(tasks);
+    const [movedTask] = newTasks.splice(result.source.index, 1);
+    newTasks.splice(result.destination.index, 0, movedTask);
+
+    console.log("New order:", newTasks); // TODO: Save reordered list to Redux
+  };
+
+  return (
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Droppable droppableId="taskList">
+        {(provided) => (
+          <ul ref={provided.innerRef} {...provided.droppableProps} className="task-list">
+            {tasks.map((task, index) => (
+              <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+                {(provided) => (
+                  <li
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    className="task-item"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={task.completed}
+                      onChange={() => dispatch(toggleTask(task.id))}
+                    />
+
+                    {editingTaskId === task.id ? (
+                      <>
+                        <input type="text" value={editedText} onChange={(e) => setEditedText(e.target.value)} />
+                        <select value={editedCategory} onChange={(e) => setEditedCategory(e.target.value)}>
+                          <option value="Work">Work</option>
+                          <option value="Personal">Personal</option>
+                          <option value="Urgent">Urgent</option>
+                        </select>
+                        <input type="date" value={editedDueDate} onChange={(e) => setEditedDueDate(e.target.value)} />
+                        <button onClick={() => handleSaveClick(task.id)}>Save</button>
+                      </>
+                    ) : (
+                      <>
+                        <span>{task.text} - {task.category} (Due: {task.dueDate || "No due date"})</span>
+                        <button onClick={() => handleEditClick(task)}>Edit</button>
+                      </>
+                    )}
+
+                    <button onClick={() => dispatch(deleteTask(task.id))}>Delete</button>
+                  </li>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </ul>
+        )}
+      </Droppable>
+    </DragDropContext>
   );
 };
 
