@@ -8,19 +8,22 @@ const TaskList = () => {
   const dispatch = useDispatch();
 
   return (
-    <ul>
-      {tasks.map((task) => (
-        <li key={task.id}>
-          <input 
-            type="checkbox" 
-            checked={task.completed} 
-            onChange={() => dispatch(toggleTask(task.id))} // Use Redux action
-          />
-          {task.text}
-          <button onClick={() => dispatch(deleteTask(task.id))}>❌</button>
-        </li>
-      ))}
-    </ul>
+    <div className="task-container">
+      <h2>My Tasks</h2>
+      <ul>
+        {tasks.map((task) => (
+          <li key={task.id} className={task.completed ? "completed" : ""}>
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={() => dispatch(toggleTask(task.id))}
+            />
+            {task.text}
+            <button onClick={() => dispatch(deleteTask(task.id))}>❌</button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 
