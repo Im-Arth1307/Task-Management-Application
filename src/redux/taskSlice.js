@@ -1,8 +1,22 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = [
-  { id: 1, text: "Example Task", completed: false,  category: "Work", dueDate: "2025-04-01" }
-];
+// Load tasks from localStorage on startup
+const loadTasks = () => {
+  try {
+    return JSON.parse(localStorage.getItem("tasks")) || [];
+  } catch (e) {
+    console.error("Error loading tasks from localStorage", e);
+    return [];
+  }
+};
+
+
+// Save tasks to localStorage
+const saveTasks = (tasks) => {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+};
+
+const initialState = loadTasks();
 
 const taskSlice = createSlice({
   name: "tasks",
@@ -28,7 +42,9 @@ const taskSlice = createSlice({
     },
     reorderTasks: (state, action) => {
       console.log("Redux updated order:", action.payload);
-      return action.payload; // Update tasks with new order
+      state.length = 0; // Clear the current state
+      state.push(...action.payload); // Push new tasks
+      saveTasks(state); // Save to localStorage
     }
   },
 });
