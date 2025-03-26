@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { toggleTask, deleteTask, editTask } from "../redux/taskSlice";
+import { toggleTask, deleteTask, editTask, reorderTasks } from "../redux/taskSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import "./TaskList.css";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -33,8 +33,9 @@ const TaskList = () => {
     const newTasks = Array.from(tasks);
     const [movedTask] = newTasks.splice(result.source.index, 1);
     newTasks.splice(result.destination.index, 0, movedTask);
-
-    console.log("New order:", newTasks); // TODO: Save reordered list to Redux
+ 
+    console.log("New order:", newTasks); 
+    dispatch(reorderTasks(newTasks));
   };
 
   return (

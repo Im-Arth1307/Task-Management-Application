@@ -26,8 +26,12 @@ const taskSlice = createSlice({
         task.dueDate = action.payload.dueDate;
       }
     },
+    reorderTasks: (state, action) => {
+      console.log("Redux updated order:", action.payload);
+      return action.payload; // Update tasks with new order
+    }
   },
 });
 
-export const { addTask, toggleTask, deleteTask, editTask } = taskSlice.actions;
+export const { addTask, toggleTask, deleteTask, editTask, reorderTasks } = taskSlice.actions;
 export default taskSlice.reducer;
