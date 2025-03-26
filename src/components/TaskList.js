@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleTask, deleteTask } from "../redux/taskSlice";
+import "./TaskList.css";
 
 const TaskList = () => {
   const tasks = useSelector((state) => state.tasks || []);// Get tasks from Redux store
