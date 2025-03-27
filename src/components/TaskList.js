@@ -10,10 +10,12 @@ const TaskList = () => {
   const tasks = useSelector((state) => state.tasks);
   const dispatch = useDispatch();
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedText, setEditedText] = useState("");
   const [editedCategory, setEditedCategory] = useState("");
   const [editedDueDate, setEditedDueDate] = useState("");
+
 
   const handleEditClick = (task) => {
     setEditingTaskId(task.id);
@@ -27,6 +29,10 @@ const TaskList = () => {
     setEditingTaskId(null);
   };
 
+  const filteredTasks = tasks.filter((task) =>
+    task.text.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const handleDragEnd = (result) => {
     if (!result.destination) return;
 
@@ -39,11 +45,21 @@ const TaskList = () => {
   };
 
   return (
+    <div>
+      {/* Search Bar */}
+      <input
+        type="text"
+        placeholder="Search tasks..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="search-input"
+    />
+    
     <DragDropContext onDragEnd={handleDragEnd}>
       <Droppable droppableId="taskList">
         {(provided) => (
           <ul ref={provided.innerRef} {...provided.droppableProps} className="task-list">
-            {tasks.map((task, index) => (
+            {filteredTasks.map((task, index) => (
               <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
                 {(provided) => (
                   <li
@@ -86,6 +102,7 @@ const TaskList = () => {
         )}
       </Droppable>
     </DragDropContext>
+  </div>
   );
 };
 
