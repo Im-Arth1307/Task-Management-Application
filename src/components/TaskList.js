@@ -10,11 +10,17 @@ const TaskList = () => {
   const tasks = useSelector((state) => state.tasks);
   const dispatch = useDispatch();
 
+  const [filterStatus, setFilterStatus] = useState("all"); // "all", "completed", "incomplete"
+
   const [searchQuery, setSearchQuery] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedText, setEditedText] = useState("");
   const [editedCategory, setEditedCategory] = useState("");
   const [editedDueDate, setEditedDueDate] = useState("");
+
+  const [categories, setCategories] = useState(["Work", "Personal", "Groceries"]); // Default categories
+  const [newCategory, setNewCategory] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all"); // Filtering category
 
 
   const handleEditClick = (task) => {
@@ -29,9 +35,18 @@ const TaskList = () => {
     setEditingTaskId(null);
   };
 
-  const filteredTasks = tasks.filter((task) =>
-    task.text.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTasks = tasks
+    .filter((task) => task.text.toLowerCase().includes(searchQuery.toLowerCase())) // Search filter
+    .filter((task) => {
+      if (filterStatus === "completed") return task.completed;
+      if (filterStatus === "incomplete") return !task.completed;
+      return true; // Show all tasks
+    })
+    .filter((task) => {
+      if (categoryFilter === "all") return true;
+      return task.category === categoryFilter;
+    });
+
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -44,6 +59,17 @@ const TaskList = () => {
     dispatch(reorderTasks(newTasks));
   };
 
+  const handleDeleteCategory = (categoryToDelete) => {
+    setCategories(categories.filter((cat) => cat !== categoryToDelete));
+
+    // Update tasks that belong to the deleted category
+    tasks.forEach((task) => {
+      if (task.category === categoryToDelete) {
+        dispatch(editTask({ id: task.id, text: task.text, category: "", dueDate: task.dueDate }));
+      }
+    });
+  };
+  
   return (
     <div>
       {/* Search Bar */}
@@ -54,7 +80,85 @@ const TaskList = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         className="search-input"
     />
-    
+
+    {/* Complete/Incomplete Filter */}
+    <div className="filter-container">
+        <label>Filter: </label>
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+          <option value="all">All</option>
+          <option value="completed">Completed</option>
+          <option value="incomplete">Incomplete</option>
+        </select>
+      </div>
+
+    {/* Filter Dropdown */}
+  {/* <div className="filter-container">
+    <label>Filter: </label>
+      <select value={editedCategory} onChange={(e) => setEditedCategory(e.target.value)}>
+        {categories.map((cat) => (
+          <option key={cat} value={cat}>{cat}</option>
+        ))}
+      </select>
+      <input 
+        type="text" 
+        placeholder="Or add a new category..." 
+        value={newCategory} 
+        onChange={(e) => setNewCategory(e.target.value)} 
+        onBlur={() => {
+          if (newCategory && !categories.includes(newCategory)) {
+            setCategories([...categories, newCategory]);
+            setEditedCategory(newCategory); // Set newly added category
+            setNewCategory("");
+          }
+        }}
+      />
+
+  </div> */}
+
+    {/* Category Filter Dropdown */}
+  {/* <div className="filter-container">
+    <label>Category Filter: </label>
+    <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+      <option value="all">All</option>
+      {categories.map((cat) => (
+        <option key={cat} value={cat}>{cat}</option>
+      ))}
+    </select>
+  </div> */}
+
+  {/* Category Selection & Adding */}
+  <div className="filter-container">
+        <label>Category: </label>
+        <select value={editedCategory} onChange={(e) => setEditedCategory(e.target.value)}>
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+        <input
+          type="text"
+          placeholder="Add new category..."
+          value={newCategory}
+          onChange={(e) => setNewCategory(e.target.value)}
+          onBlur={() => {
+            if (newCategory && !categories.includes(newCategory)) {
+              setCategories([...categories, newCategory]);
+              setNewCategory("");
+            }
+          }}
+        />
+      </div>
+
+      {/* Delete Category */}
+      <div className="filter-container">
+        <label>Delete Category: </label>
+        <select onChange={(e) => handleDeleteCategory(e.target.value)}>
+          <option value="">Select</option>
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      </div>
+  
     <DragDropContext onDragEnd={handleDragEnd}>
       <Droppable droppableId="taskList">
         {(provided) => (
@@ -107,3 +211,4 @@ const TaskList = () => {
 };
 
 export default TaskList;
+
