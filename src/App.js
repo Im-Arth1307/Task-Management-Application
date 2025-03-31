@@ -5,7 +5,6 @@ import { useDispatch } from "react-redux";
 import { addTask } from "./redux/taskSlice";
 import "./App.css";
 
-
 const App = () => {
   const [taskText, setTaskText] = useState("");
   const dispatch = useDispatch();
@@ -19,7 +18,7 @@ const App = () => {
 
   return (
     <div className="app-container">
-      <h1>Task Manager App</h1>
+      <h1>Task Management Application</h1>
 
       <div className="task-input-container">
         <input
