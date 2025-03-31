@@ -139,7 +139,7 @@ const TaskList = () => {
   }, [tasks]); // Add tasks as a dependency to re-run when tasks change
 
   return (
-    <div>
+    <div className="task-container">
       <ToastContainer />
       
       {/* Search Bar */}
