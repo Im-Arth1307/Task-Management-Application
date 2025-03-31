@@ -3,13 +3,17 @@ import { createSlice } from "@reduxjs/toolkit";
 // Load tasks from localStorage on startup
 const loadTasks = () => {
   try {
-    return JSON.parse(localStorage.getItem("tasks")) || [];
+    const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    // Add default priority to existing tasks if they don't have it
+    return tasks.map(task => ({
+      ...task,
+      priority: task.priority || "medium"
+    }));
   } catch (e) {
     console.error("Error loading tasks from localStorage", e);
     return [];
   }
 };
-
 
 // Save tasks to localStorage
 const saveTasks = (tasks) => {
@@ -23,7 +27,12 @@ const taskSlice = createSlice({
   initialState,
   reducers: {
     addTask: (state, action) => {
-      state.push({ id: Date.now(), text: action.payload, completed: false });
+      state.push({ 
+        id: Date.now(), 
+        text: action.payload, 
+        completed: false,
+        priority: "medium" // Default priority
+      });
     },
     toggleTask: (state, action) => {
       const task = state.find(task => task.id === action.payload);
@@ -38,6 +47,7 @@ const taskSlice = createSlice({
         task.text = action.payload.text;
         task.category = action.payload.category;
         task.dueDate = action.payload.dueDate;
+        task.priority = action.payload.priority;
       }
     },
     reorderTasks: (state, action) => {

@@ -48,3 +48,15 @@
     cursor: pointer;
   }
   
+  /* Priority styles */
+  .high-priority {
+    border-left: 4px solid #ff4444;
+  }
+
+  .medium-priority {
+    border-left: 4px solid #ffbb33;
+  }
+
+  .low-priority {
+    border-left: 4px solid #66cc66;
+  }

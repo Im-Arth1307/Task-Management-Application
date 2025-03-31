@@ -18,8 +18,11 @@ const TaskList = () => {
   const [editedText, setEditedText] = useState("");
   const [editedCategory, setEditedCategory] = useState("");
   const [editedDueDate, setEditedDueDate] = useState("");
+  const [editedPriority, setEditedPriority] = useState("medium");
 
   const [categories, setCategories] = useState(["Work", "Personal", "Groceries"]); // Default categories
+  const [priorities, setPriorities] = useState(["high", "medium", "low"]);
+  const [priorityFilter, setPriorityFilter] = useState("all");
   const [newCategory, setNewCategory] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all"); // Filtering category
 
@@ -29,10 +32,17 @@ const TaskList = () => {
     setEditedText(task.text);
     setEditedCategory(task.category);
     setEditedDueDate(task.dueDate);
+    setEditedPriority(task.priority || "medium");
   };
 
   const handleSaveClick = (taskId) => {
-    dispatch(editTask({ id: taskId, text: editedText, category: editedCategory, dueDate: editedDueDate }));
+    dispatch(editTask({ 
+      id: taskId, 
+      text: editedText, 
+      category: editedCategory, 
+      dueDate: editedDueDate,
+      priority: editedPriority === "medium" ? null : editedPriority
+    }));
     setEditingTaskId(null);
   };
 
@@ -46,6 +56,19 @@ const TaskList = () => {
   .filter((task) => {
     if (categoryFilter === "all") return true;
     return task.category === categoryFilter;
+  })
+  .filter((task) => {
+    if (priorityFilter === "all") return true;
+    return task.priority === priorityFilter;
+  })
+  .sort((a, b) => {
+    // Sort by priority (high -> medium -> low)
+    if (a.priority === b.priority) return 0;
+    if (a.priority === "high") return -1;
+    if (b.priority === "high") return 1;
+    if (a.priority === "medium") return -1;
+    if (b.priority === "medium") return 1;
+    return 0;
   });
 
   const handleDragEnd = (result) => {
@@ -118,6 +141,7 @@ const TaskList = () => {
   return (
     <div>
       <ToastContainer />
+      
       {/* Search Bar */}
       <input
         type="text"
@@ -136,6 +160,17 @@ const TaskList = () => {
             <option value="all">All</option>
             <option value="completed">Completed</option>
             <option value="incomplete">Incomplete</option>
+          </select>
+        </div>
+
+        {/* Priority Filter */}
+        <div className="filter-container">
+          <label>Priority: </label>
+          <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
+            <option value="all">All Priorities</option>
+            {priorities.map((priority) => (
+              <option key={priority} value={priority}>{priority.charAt(0).toUpperCase() + priority.slice(1)}</option>
+            ))}
           </select>
         </div>
 
@@ -193,7 +228,7 @@ const TaskList = () => {
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      className="task-item"
+                      className={`task-item ${task.priority}-priority`}
                     >
                       <input
                         type="checkbox"
@@ -211,11 +246,16 @@ const TaskList = () => {
                             ))}
                           </select>
                           <input type="date" value={editedDueDate} onChange={(e) => setEditedDueDate(e.target.value)} />
+                          <select value={editedPriority} onChange={(e) => setEditedPriority(e.target.value)}>
+                            {priorities.map((priority) => (
+                              <option key={priority} value={priority}>{priority.charAt(0).toUpperCase() + priority.slice(1)}</option>
+                            ))}
+                          </select>
                           <button onClick={() => handleSaveClick(task.id)}>Save</button>
                         </>
                       ) : (
                         <>
-                          <span>{task.text} - {task.category} (Due: {task.dueDate || "No due date"})</span>
+                          <span>{task.text} - {task.category} (Due: {task.dueDate || "No due date"}) - Priority: {(task.priority || "medium").charAt(0).toUpperCase() + (task.priority || "medium").slice(1)}</span>
                           <button onClick={() => handleEditClick(task)}>Edit</button>
                         </>
                       )}
