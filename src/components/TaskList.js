@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleTask, deleteTask, editTask, reorderTasks } from "../redux/taskSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import "./TaskList.css";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const TaskList = () => {
   const tasks = useSelector((state) => state.tasks);
@@ -34,18 +35,6 @@ const TaskList = () => {
     dispatch(editTask({ id: taskId, text: editedText, category: editedCategory, dueDate: editedDueDate }));
     setEditingTaskId(null);
   };
-
-  // const filteredTasks = tasks
-  //   .filter((task) => task.text.toLowerCase().includes(searchQuery.toLowerCase())) // Search filter
-  //   .filter((task) => {
-  //     if (filterStatus === "completed") return task.completed;
-  //     if (filterStatus === "incomplete") return !task.completed;
-  //     return true; // Show all tasks
-  //   })
-  //   .filter((task) => {
-  //     if (categoryFilter === "all") return true;
-  //     return task.category === categoryFilter;
-  //   });
 
   const filteredTasks = tasks
   .filter((task) => task.text.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -80,9 +69,55 @@ const TaskList = () => {
       }
     });
   };
-  
+
+  const checkDueDates = () => {
+    const now = new Date();
+    const oneDay = 24 * 60 * 60 * 1000; // milliseconds in a day
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    const tomorrowStart = new Date(tomorrow);
+    tomorrowStart.setHours(0, 0, 0, 0);
+    const tomorrowEnd = new Date(tomorrow);
+    tomorrowEnd.setHours(23, 59, 59, 999);
+    
+    tasks.forEach(task => {
+      if (!task.completed && task.dueDate) {
+        const dueDate = new Date(task.dueDate);
+        
+        // Check if due today (any time today)
+        if (dueDate >= now && dueDate <= tomorrowStart) {
+          toast.warning(`Task "${task.text}" is due today!`, {
+            position: "top-right",
+            autoClose: 5000,
+            closeOnClick: true,
+          });
+        }
+        // Check if due tomorrow (any time tomorrow)
+        else if (dueDate >= tomorrowStart && dueDate <= tomorrowEnd) {
+          toast.info(`Task "${task.text}" is due tomorrow`, {
+            position: "top-right",
+            autoClose: 5000,
+            closeOnClick: true,
+          });
+        }
+      }
+    });
+  };
+
+  useEffect(() => {
+    // Check due dates immediately when component mounts
+    checkDueDates();
+    
+    // Set up interval to check every hour
+    const interval = setInterval(checkDueDates, 3600000); // 1 hour in milliseconds
+    
+    // Clean up interval when component unmounts
+    return () => clearInterval(interval);
+  }, [tasks]); // Add tasks as a dependency to re-run when tasks change
+
   return (
     <div>
+      <ToastContainer />
       {/* Search Bar */}
       <input
         type="text"
