@@ -118,17 +118,12 @@ const TaskList = () => {
 
       {/* Category Management Controls */}
       <div className="category-management">
-        {/* Category Selection */}
+        {/* Add new category */}
         <div className="filter-container">
-          <label>Set Category: </label>
-          <select value={editedCategory} onChange={(e) => setEditedCategory(e.target.value)}>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
+          <label>Add new category:</label>
           <input
             type="text"
-            placeholder="Add new category..."
+            placeholder="Enter new category..."
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
             onBlur={() => {
@@ -175,9 +170,10 @@ const TaskList = () => {
                         <>
                           <input type="text" value={editedText} onChange={(e) => setEditedText(e.target.value)} />
                           <select value={editedCategory} onChange={(e) => setEditedCategory(e.target.value)}>
-                            <option value="Work">Work</option>
-                            <option value="Personal">Personal</option>
-                            <option value="Urgent">Urgent</option>
+                            <option value="">Select Category</option>
+                            {categories.map((cat) => (
+                              <option key={cat} value={cat}>{cat}</option>
+                            ))}
                           </select>
                           <input type="date" value={editedDueDate} onChange={(e) => setEditedDueDate(e.target.value)} />
                           <button onClick={() => handleSaveClick(task.id)}>Save</button>
