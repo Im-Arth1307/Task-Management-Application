@@ -35,18 +35,29 @@ const TaskList = () => {
     setEditingTaskId(null);
   };
 
-  const filteredTasks = tasks
-    .filter((task) => task.text.toLowerCase().includes(searchQuery.toLowerCase())) // Search filter
-    .filter((task) => {
-      if (filterStatus === "completed") return task.completed;
-      if (filterStatus === "incomplete") return !task.completed;
-      return true; // Show all tasks
-    })
-    .filter((task) => {
-      if (categoryFilter === "all") return true;
-      return task.category === categoryFilter;
-    });
+  // const filteredTasks = tasks
+  //   .filter((task) => task.text.toLowerCase().includes(searchQuery.toLowerCase())) // Search filter
+  //   .filter((task) => {
+  //     if (filterStatus === "completed") return task.completed;
+  //     if (filterStatus === "incomplete") return !task.completed;
+  //     return true; // Show all tasks
+  //   })
+  //   .filter((task) => {
+  //     if (categoryFilter === "all") return true;
+  //     return task.category === categoryFilter;
+  //   });
 
+  const filteredTasks = tasks
+  .filter((task) => task.text.toLowerCase().includes(searchQuery.toLowerCase()))
+  .filter((task) => {
+    if (filterStatus === "completed") return task.completed;
+    if (filterStatus === "incomplete") return !task.completed;
+    return true;
+  })
+  .filter((task) => {
+    if (categoryFilter === "all") return true;
+    return task.category === categoryFilter;
+  });
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -79,136 +90,117 @@ const TaskList = () => {
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="search-input"
-    />
-
-    {/* Complete/Incomplete Filter */}
-    <div className="filter-container">
-        <label>Filter: </label>
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-          <option value="all">All</option>
-          <option value="completed">Completed</option>
-          <option value="incomplete">Incomplete</option>
-        </select>
-      </div>
-
-    {/* Filter Dropdown */}
-  {/* <div className="filter-container">
-    <label>Filter: </label>
-      <select value={editedCategory} onChange={(e) => setEditedCategory(e.target.value)}>
-        {categories.map((cat) => (
-          <option key={cat} value={cat}>{cat}</option>
-        ))}
-      </select>
-      <input 
-        type="text" 
-        placeholder="Or add a new category..." 
-        value={newCategory} 
-        onChange={(e) => setNewCategory(e.target.value)} 
-        onBlur={() => {
-          if (newCategory && !categories.includes(newCategory)) {
-            setCategories([...categories, newCategory]);
-            setEditedCategory(newCategory); // Set newly added category
-            setNewCategory("");
-          }
-        }}
       />
 
-  </div> */}
+      {/* Filter Controls */}
+      <div className="filter-controls">
+        {/* Complete/Incomplete Filter */}
+        <div className="filter-container">
+          <label>Filter: </label>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            <option value="all">All</option>
+            <option value="completed">Completed</option>
+            <option value="incomplete">Incomplete</option>
+          </select>
+        </div>
 
-    {/* Category Filter Dropdown */}
-  {/* <div className="filter-container">
-    <label>Category Filter: </label>
-    <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-      <option value="all">All</option>
-      {categories.map((cat) => (
-        <option key={cat} value={cat}>{cat}</option>
-      ))}
-    </select>
-  </div> */}
-
-  {/* Category Selection & Adding */}
-  <div className="filter-container">
-        <label>Category: </label>
-        <select value={editedCategory} onChange={(e) => setEditedCategory(e.target.value)}>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
-        <input
-          type="text"
-          placeholder="Add new category..."
-          value={newCategory}
-          onChange={(e) => setNewCategory(e.target.value)}
-          onBlur={() => {
-            if (newCategory && !categories.includes(newCategory)) {
-              setCategories([...categories, newCategory]);
-              setNewCategory("");
-            }
-          }}
-        />
-      </div>
-
-      {/* Delete Category */}
-      <div className="filter-container">
-        <label>Delete Category: </label>
-        <select onChange={(e) => handleDeleteCategory(e.target.value)}>
-          <option value="">Select</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
-      </div>
-  
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="taskList">
-        {(provided) => (
-          <ul ref={provided.innerRef} {...provided.droppableProps} className="task-list">
-            {filteredTasks.map((task, index) => (
-              <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-                {(provided) => (
-                  <li
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    className="task-item"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={task.completed}
-                      onChange={() => dispatch(toggleTask(task.id))}
-                    />
-
-                    {editingTaskId === task.id ? (
-                      <>
-                        <input type="text" value={editedText} onChange={(e) => setEditedText(e.target.value)} />
-                        <select value={editedCategory} onChange={(e) => setEditedCategory(e.target.value)}>
-                          <option value="Work">Work</option>
-                          <option value="Personal">Personal</option>
-                          <option value="Urgent">Urgent</option>
-                        </select>
-                        <input type="date" value={editedDueDate} onChange={(e) => setEditedDueDate(e.target.value)} />
-                        <button onClick={() => handleSaveClick(task.id)}>Save</button>
-                      </>
-                    ) : (
-                      <>
-                        <span>{task.text} - {task.category} (Due: {task.dueDate || "No due date"})</span>
-                        <button onClick={() => handleEditClick(task)}>Edit</button>
-                      </>
-                    )}
-
-                    <button onClick={() => dispatch(deleteTask(task.id))}>Delete</button>
-                  </li>
-                )}
-              </Draggable>
+        {/* Category Filter */}
+        <div className="filter-container">
+          <label>Category: </label>
+          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+            <option value="all">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
             ))}
-            {provided.placeholder}
-          </ul>
-        )}
-      </Droppable>
-    </DragDropContext>
-  </div>
+          </select>
+        </div>
+      </div>
+
+      {/* Category Management Controls */}
+      <div className="category-management">
+        {/* Category Selection */}
+        <div className="filter-container">
+          <label>Set Category: </label>
+          <select value={editedCategory} onChange={(e) => setEditedCategory(e.target.value)}>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+          <input
+            type="text"
+            placeholder="Add new category..."
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            onBlur={() => {
+              if (newCategory && !categories.includes(newCategory)) {
+                setCategories([...categories, newCategory]);
+                setNewCategory("");
+              }
+            }}
+          />
+        </div>
+
+        {/* Delete Category */}
+        <div className="filter-container">
+          <label>Delete Category: </label>
+          <select onChange={(e) => handleDeleteCategory(e.target.value)}>
+            <option value="">Select</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="taskList">
+          {(provided) => (
+            <ul ref={provided.innerRef} {...provided.droppableProps} className="task-list">
+              {filteredTasks.map((task, index) => (
+                <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+                  {(provided) => (
+                    <li
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className="task-item"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={task.completed}
+                        onChange={() => dispatch(toggleTask(task.id))}
+                      />
+
+                      {editingTaskId === task.id ? (
+                        <>
+                          <input type="text" value={editedText} onChange={(e) => setEditedText(e.target.value)} />
+                          <select value={editedCategory} onChange={(e) => setEditedCategory(e.target.value)}>
+                            <option value="Work">Work</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Urgent">Urgent</option>
+                          </select>
+                          <input type="date" value={editedDueDate} onChange={(e) => setEditedDueDate(e.target.value)} />
+                          <button onClick={() => handleSaveClick(task.id)}>Save</button>
+                        </>
+                      ) : (
+                        <>
+                          <span>{task.text} - {task.category} (Due: {task.dueDate || "No due date"})</span>
+                          <button onClick={() => handleEditClick(task)}>Edit</button>
+                        </>
+                      )}
+
+                      <button onClick={() => dispatch(deleteTask(task.id))}>Delete</button>
+                    </li>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </ul>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </div>
   );
 };
 
 export default TaskList;
-
